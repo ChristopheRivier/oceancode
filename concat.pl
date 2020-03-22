@@ -18,7 +18,7 @@ open( my $main, "<" , $source.'main.cpp');
 
 	while ( ! eof($tmp) ) {
          my $linetmp = readline $tmp;
-		 if( $linetmp=~/#pragma/){}
+		 if( $linetmp=~/#pragma|#include "/){}
 		 else{
 		 print $prog $linetmp;
 		 }

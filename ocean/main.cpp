@@ -3,9 +3,12 @@
 #include <vector>
 #include <algorithm>
 
+bool debug = true;
+
 using namespace std;
 #include "point.h"
 #include "carte.h"
+#include "infoboucle.h"
 
 /**
  * Auto-generated code below aims at helping you parse
@@ -28,8 +31,8 @@ int main()
 	ca.printCarte();
 	// Write an action using cout. DON'T FORGET THE "<< endl"
 	// To debug: cerr << "Debug messages..." << endl;
-
-	cout << "7 7" << endl;
+	Point a = ca.getInit();
+	cout << a.toString() << endl;
 
 	// game loop
 	while (1) {
@@ -42,11 +45,18 @@ int main()
 		int silenceCooldown;
 		int mineCooldown;
 		cin >> x >> y >> myLife >> oppLife >> torpedoCooldown >> sonarCooldown >> silenceCooldown >> mineCooldown; cin.ignore();
+		InfoBoucle boul(x, y, myLife, oppLife, torpedoCooldown, sonarCooldown, silenceCooldown, mineCooldown);
 		string sonarResult;
 		cin >> sonarResult; cin.ignore();
+		boul.addSonar(sonarResult);
 		string opponentOrders;
 		getline(cin, opponentOrders);
+		boul.addOrder(opponentOrders);
 
+		if (debug)
+		{
+			std::cerr << boul.print() << endl;
+		}
 		// Write an action using cout. DON'T FORGET THE "<< endl"
 		// To debug: cerr << "Debug messages..." << endl;
 
