@@ -9,6 +9,9 @@ using namespace std;
 #include "point.h"
 #include "carte.h"
 #include "infoboucle.h"
+#include "zoneOpp.h"
+
+#include "game.h"
 
 /**
  * Auto-generated code below aims at helping you parse
@@ -27,13 +30,15 @@ int main()
 		string line;
 		getline(cin, line);
 		ca.addLine(i, line);
+		cerr << line << endl;
 	}
-	ca.printCarte();
+
 	// Write an action using cout. DON'T FORGET THE "<< endl"
 	// To debug: cerr << "Debug messages..." << endl;
 	Point a = ca.getInit();
 	cout << a.toString() << endl;
-
+	Game game;
+	game.addCarte(ca);
 	// game loop
 	while (1) {
 		int x;
@@ -52,14 +57,19 @@ int main()
 		string opponentOrders;
 		getline(cin, opponentOrders);
 		boul.addOrder(opponentOrders);
-
+		game.addBoucle(boul);
 		if (debug)
 		{
 			std::cerr << boul.print() << endl;
 		}
+		
 		// Write an action using cout. DON'T FORGET THE "<< endl"
 		// To debug: cerr << "Debug messages..." << endl;
 
-		cout << "MOVE N TORPEDO" << endl;
+		// Write an action using cout. DON'T FORGET THE "<< endl"
+		// To debug: cerr << "Debug messages..." << endl;
+		
+		cout <<  game.getMove()<< endl;
+
 	}
 }

@@ -51,6 +51,9 @@ public:
 	bool deplacementPossible(Point p) {
 		return cart[p.x][p.y].isFree();
 	}
+	void position(Point p) {
+		cart[p.x][p.y].passer();
+	}
 	void printCarte() {
 		if (true) {
 			for (int i = 0; i < width; ++i)
@@ -59,8 +62,18 @@ public:
 				{
 					std::cerr << cart[i][j].getChar();
 				}
-				std::cerr << std::endl;
+				std::cerr<< std::endl;
 			}
 		}
+	}
+	void clear() {
+		for (int i = 0; i < width; ++i)
+		{
+			for (int j = 0; j < height; ++j)
+			{
+				cart[i][j].clearPass();
+			}
+		}
+
 	}
 };

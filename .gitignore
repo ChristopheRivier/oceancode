@@ -3,3 +3,4 @@ perlCodeGen.cpp
 *.user
 .vs
 packages
+Release

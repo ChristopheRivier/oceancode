@@ -31,6 +31,19 @@ public:
 		return ret;
 	}
 
+	bool go(char w) {
+		switch (w) {
+		case 'N':
+			return goN();
+		case 'S':
+			return goS();
+		case 'E':
+			return goE();
+		case 'W':
+			return goW();
+		}
+		return false;
+	}
 	bool goN() {
 		if (y > 0) {
 			--y;
@@ -62,6 +75,7 @@ public:
 		}
 	}
 	bool goS() {
+		std::cerr << "S" << std::endl;
 		if (y < 15) {
 			++y;
 			return true;
