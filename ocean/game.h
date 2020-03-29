@@ -99,7 +99,7 @@ public:
 			a = init;
 			init = Point(-1, -1);
 		}
-		if (lstPossible.size() < 50 && lstPossible.size()>0) {
+		if (lstPossible.size() < 15 && lstPossible.size()>0) {
 			Point as = a;
 			std::string dep = getPrivilegeDirection(a, lstPossible[0]);
 			if (!dep.empty() &&
