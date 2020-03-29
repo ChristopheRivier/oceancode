@@ -31,9 +31,10 @@ class InfoBoucle {
 	std::string order;
 	std::string moveOpp;
 	int surface;
+	Point tir;
 public:
 	InfoBoucle(int x, int y, int l, int o, int t, int s, int q, int m):pos(x,y),mylife(l),opplife(o),torpe(t), sonar(s), silence(q),
-		mine(m), surface(-1){}
+		mine(m), surface(-1), tir(-1,-1){}
 	void addSonar(std::string s) {
 		sonarRes = s;
 	}
@@ -42,6 +43,7 @@ public:
 		//init variable
 		moveOpp = "";
 		surface = -1;
+		tir = Point(-1, -1);
 		std::vector<std::string> list = split(o, '|');
 		for (std::vector<std::string>::iterator it = list.begin(); it != list.end(); ++it) {
 			if ((*it).find("MOVE") != std::string::npos) {
@@ -54,11 +56,23 @@ public:
 				if ((*it).back() == ' ') {
 					(*it).pop_back();
 				}
-				surface = std::stoi(std::to_string((*it).back()));
+				std::string i;
+				i.push_back((*it).back());
+				surface = std::stoi(i);
 			}
-
+			if ((*it).find("TORPEDO") != std::string::npos) {
+				if ((*it).back() == ' ') {
+					(*it).pop_back();
+				}
+				std::vector<std::string> list = split((*it), ' ');
+				tir = Point(std::stoi(list[1]), std::stoi(list[2]));
+			}
+			if ((*it).find("SILENCE") != std::string::npos) {
+				moveOpp = "?";
+			}
 		}
 	}
+	Point getTir() { return tir; }
 	int getSurface() {
 		return surface;
 	}

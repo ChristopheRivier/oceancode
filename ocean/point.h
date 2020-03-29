@@ -41,6 +41,9 @@ public:
 			return goE();
 		case 'W':
 			return goW();
+		case '?':
+			//in that case we will do the test after
+			return true;
 		}
 		return false;
 	}
@@ -75,7 +78,6 @@ public:
 		}
 	}
 	bool goS() {
-		std::cerr << "S" << std::endl;
 		if (y < 15) {
 			++y;
 			return true;

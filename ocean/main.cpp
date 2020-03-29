@@ -37,7 +37,7 @@ int main()
 	// To debug: cerr << "Debug messages..." << endl;
 	Point a = ca.getInit();
 	cout << a.toString() << endl;
-	Game game;
+	Game game(debug);
 	game.addCarte(ca);
 	// game loop
 	while (1) {
@@ -61,6 +61,8 @@ int main()
 		if (debug)
 		{
 			std::cerr << boul.print() << endl;
+
+			std::cerr << game.getLstPossible().size() << " possible" << endl;
 		}
 		
 		// Write an action using cout. DON'T FORGET THE "<< endl"
