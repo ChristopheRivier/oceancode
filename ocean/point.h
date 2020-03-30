@@ -58,7 +58,7 @@ public:
 		}
 	}
 	bool goE() {
-		if (x < 15) {
+		if (x < 14) {
 			++x;
 			return true;
 		}
@@ -78,7 +78,7 @@ public:
 		}
 	}
 	bool goS() {
-		if (y < 15) {
+		if (y < 14) {
 			++y;
 			return true;
 		}
@@ -86,6 +86,46 @@ public:
 		{
 			return false;
 		}
+	}
+	bool N() {
+		if (y > 0) {
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	bool E() {
+		if (x < 14) {
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	bool W() {
+		if (x > 0) {
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	bool S() {
+		if (y < 14) {
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool operator==(const Point& a) {
+		return this->x == a.x && this->y == a.y;
 	}
 };
 

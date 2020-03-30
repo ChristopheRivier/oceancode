@@ -109,16 +109,16 @@ public:
 			}
 		}
 
-		if (c.deplacementPossible(a.getN())) {
+		if (a.N() && c.deplacementPossible(a.getN())) {
 			return "N";
 		}
-		else if (c.deplacementPossible(a.getE())) {
+		else if (a.E()&&c.deplacementPossible(a.getE())) {
 			return "E";
 		}
-		else if (c.deplacementPossible(a.getS())) {
+		else if (a.S()&&c.deplacementPossible(a.getS())) {
 			return "S";
 		}
-		else if (c.deplacementPossible(a.getW())) {
+		else if (a.W()&&c.deplacementPossible(a.getW())) {
 			return "W";
 		}
 		return "";
@@ -126,7 +126,7 @@ public:
 	std::string getPrivilegeDirection(Point a,Point b) {
 		int x = a.x - b.x;
 		int y = a.y - b.y;
-		if (y == 0 && x == 0)
+		if (abs(y) <= 1 && x <= 1)
 			return "";
 		if (abs(x) > abs(y)) {
 			if (x > 0)
@@ -215,22 +215,27 @@ public:
 				Point a = *it;
 				bool ret = false;
 				if ( a.goS() && !c.isIsland(a) && positionPossibleWithReversePath(a, "S", deplacementOpp)) {
-					tmp.push_back(a);
+					if(std::find(tmp.begin(),tmp.end(),a)==tmp.end())
+						tmp.push_back(a);
 				}
 				a = *it;
 				if (a.goN() && !c.isIsland(a) && positionPossibleWithReversePath(a, "N", deplacementOpp)) {
-					tmp.push_back(a);
+					if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+						tmp.push_back(a);
 				}
 				a = *it;
 				if (a.goW() && !c.isIsland(a) && positionPossibleWithReversePath(a, "W", deplacementOpp)) {
-					tmp.push_back(a);
+					if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+						tmp.push_back(a);
 				}
 				a = *it;
 				if (a.goE() && !c.isIsland(a) && positionPossibleWithReversePath(a, "E", deplacementOpp)) {
-					tmp.push_back(a);
+					if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+						tmp.push_back(a);
 				}
 			}else if ((*it).go(w[0]) && !c.isIsland(*it) && positionPossibleWithReversePath(*it,w,deplacementOpp) ) {
-				tmp.push_back(*it);
+				if (std::find(tmp.begin(), tmp.end(), *it) == tmp.end())
+					tmp.push_back(*it);
 			}
 		}
 		lstPossible.clear();
@@ -264,27 +269,50 @@ public:
 		lstPossible = lst;
 	}
 
+	std::string getPower() {
+		std::string s = "TORPEDO";
+		InfoBoucle i = *tour.rbegin();
+		if (i.getTorpe() != 0) {
+			s = "TORPEDO";
+		}
+		else if (i.getTorpe() == 0 && i.getSilence()!=0 ) {
+			s = "SILENCE";
+		}
+		else {
+			s = "SONAR";
+		}
+		return s;
+	}
+
 	std::string getMove() {
 		std::string dep = calculDeplacement();
 		std::string ret = "MOVE ";
+		bool power = false;
 		if (dep.empty()) {
 			ret = "SURFACE";
 			init = (*tour.rbegin()).getPos();
 			c.clear();
 		}
-		else
-			ret += dep ;
+		else {
+			if ((*tour.rbegin()).getSilence() == 0) {
+				ret = "SILENCE " + dep + " 1";
+			}
+			else {
+				power = true;
+				ret += dep;
+			}
+		}
 		if ((*tour.rbegin()).getTorpe() == 0 && getLstPossible().size()<10) {
 			if(getLstPossible().size()==0)
 				calculDesPossible();
 			Point n = isNear((*tour.rbegin()).getPos());
 			if (n.x!=-1) {
 				ret += "|TORPEDO " + n.toString();
-			}else
-				ret += " TORPEDO";
+			}else if(power)
+				ret += " " + getPower();
 		}
-		else
-			ret += " TORPEDO";
+		else if(power)
+			ret += " " + getPower();
 		return ret;
 	}
 };
