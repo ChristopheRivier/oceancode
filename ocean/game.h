@@ -2,9 +2,11 @@
 #ifndef GAME_H
 #define GAME_H
 #include <vector>
+
 #include "carte.h"
 #include "infoboucle.h"
 #include "zoneOpp.h"
+#include "action.h"
 
 //bool debug = true; //#pragma  suppress in the concat file
 
@@ -16,6 +18,7 @@ class Game {
 	std::vector<Point> lstPossible;
 	Point init;
 	bool debug;
+	Actions actPrec; //action précédente
 public:
 
 	Game() :init(-1,-1),debug(false){}
@@ -24,6 +27,31 @@ public:
 
 	void addCarte(Carte& car) { c = car; }
 	void addBoucle(InfoBoucle& b) {
+		//test si action a porté
+		//TODO faire un TU
+		if (actPrec.getTir().x != -1 ){
+			std::vector<Point> tmp ;
+
+			for (std::vector<Point>::iterator it = lstPossible.begin();
+				it != lstPossible.end();
+				++it) {
+				if ((*it) == actPrec.getTir() &&
+					b.getOppLife() + 2 == (*tour.rbegin()).getOppLife()
+					) {
+					tmp.push_back(*it);
+				}
+				else if (b.getOppLife() + 1 == (*tour.rbegin()).getOppLife() &&
+					(*it).x <= actPrec.getTir().x + 1 && (*it).x >= actPrec.getTir().x - 1 &&
+					(*it).y <= actPrec.getTir().y + 1 && (*it).y >= actPrec.getTir().y - 1) {
+					tmp.push_back(*it);
+				}
+				else if (b.getOppLife() == (*tour.rbegin()).getOppLife() &&
+					(*it) != actPrec.getTir() ) {//pas toucher
+					tmp.push_back(*it);
+				}
+			}
+			lstPossible = tmp;
+		}
 		tour.push_back(b);
 		if (init.x != -1)
 			c.position(init);
@@ -105,7 +133,7 @@ public:
 			if (!dep.empty() &&
 				as.go(dep[0]) &&
 				c.deplacementPossible(as)) {
-				return getPrivilegeDirection(a, lstPossible[0]);
+				return dep;
 			}
 		}
 
@@ -228,7 +256,7 @@ public:
 					if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
 						tmp.push_back(a);
 				}
-				a = *it;
+				a = *it;	
 				if (a.goE() && !c.isIsland(a) && positionPossibleWithReversePath(a, "E", deplacementOpp)) {
 					if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
 						tmp.push_back(a);
@@ -285,6 +313,7 @@ public:
 	}
 
 	std::string getMove() {
+		actPrec.init();
 		std::string dep = calculDeplacement();
 		std::string ret = "MOVE ";
 		bool power = false;
@@ -294,6 +323,7 @@ public:
 			c.clear();
 		}
 		else {
+			actPrec.setDirection(dep);
 			if ((*tour.rbegin()).getSilence() == 0) {
 				ret = "SILENCE " + dep + " 1";
 			}
@@ -307,6 +337,7 @@ public:
 				calculDesPossible();
 			Point n = isNear((*tour.rbegin()).getPos());
 			if (n.x!=-1) {
+				actPrec.setTir(n);
 				ret += "|TORPEDO " + n.toString();
 			}else if(power)
 				ret += " " + getPower();

@@ -10,7 +10,7 @@ using namespace std;
 #include "carte.h"
 #include "infoboucle.h"
 #include "zoneOpp.h"
-
+#include "action.h"
 #include "game.h"
 
 /**

@@ -127,6 +127,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="action.h" />
     <ClInclude Include="carte.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="infoboucle.h" />

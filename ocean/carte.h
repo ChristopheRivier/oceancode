@@ -76,4 +76,34 @@ public:
 		}
 
 	}
+	double calcDeplacement( int recurence, Point initial, std::string direction) {
+		if (recurence == 3)
+			return 100;
+		recurence++;
+		if (!deplacementPossible(initial))
+			return -100;
+
+		double ret = 0.0;
+		Point tmp = initial;
+		if (direction.compare("S") != 0) {
+			if (tmp.goN())
+				ret = calcDeplacement(recurence, tmp, "N") / 3;
+		}
+		tmp = initial;
+		if (direction.compare("N") != 0) {
+			if (tmp.goS())
+				ret += calcDeplacement(recurence, tmp, "S")/3;
+		}
+		tmp = initial;
+		if (direction.compare("E") != 0) {
+			if (tmp.goW())
+				ret += calcDeplacement(recurence, tmp, "W")/3;
+		}
+		tmp = initial;
+		if (direction.compare("W")) {
+			if (tmp.goE())
+				ret += calcDeplacement(recurence, tmp, "E")/3;
+		}
+		return ret;
+	}
 };

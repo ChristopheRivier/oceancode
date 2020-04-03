@@ -127,6 +127,9 @@ public:
 	bool operator==(const Point& a) {
 		return this->x == a.x && this->y == a.y;
 	}
+	bool operator!=(const Point& a) {
+		return this->x != a.x || this->y != a.y;
+	}
 };
 
 #endif // !POINT

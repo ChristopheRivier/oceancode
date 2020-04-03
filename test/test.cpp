@@ -741,3 +741,124 @@ TEST(TestCaseCG, OutsideMap) {
 	EXPECT_EQ(s, "MOVE W TORPEDO");
 
 }
+
+TEST(TestCaseOpposant, touchecoule) {
+	Carte ca(15, 15, 0);
+	std::string line;
+
+	ca.addLine(0, "............xx.");
+	ca.addLine(1, "............xx.");
+	ca.addLine(2, "............xx.");
+	ca.addLine(3, "...............");
+	ca.addLine(4, "...............");
+	ca.addLine(5, "...............");
+	ca.addLine(6, "...........xx..");
+	ca.addLine(7, "...........xx..");
+	ca.addLine(8, "...............");
+	ca.addLine(9, "...............");
+	ca.addLine(10, "...xxx.........");
+	ca.addLine(11, "...xxx.........");
+	ca.addLine(12, "...xxx......xx.");
+	ca.addLine(13, "............xx.");
+	ca.addLine(14, "...............");
+
+	Point p = ca.getInit();
+	InfoBoucle boul(7, 4, 6, 6, 0, 1, 1, 1);
+	boul.addOrder("MOVE E");
+
+	Game a;
+	a.addCarte(ca);
+	a.addBoucle(boul);
+	a.getMove();
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	a.getMove();
+
+	EXPECT_EQ(a.getHauteur(), 3);
+	EXPECT_EQ(a.getLargeur(), 2);
+
+
+	a.calculDesPossible();
+	EXPECT_EQ(a.getLstPossible().size(), 147);
+
+	std::string s = a.getMove();
+	EXPECT_EQ(s, "MOVE N SILENCE");
+
+	boul.addOrder("SURFACE 6");
+	a.addBoucle(boul);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+
+	boul = InfoBoucle(13, 10, 6, 6, 0, 1, 1, 1);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	// tir en 10 11
+	a.getMove();
+
+	// pas toucher 
+	boul = InfoBoucle(13, 10, 6, 6, 0, 1, 1, 1);
+	boul.addOrder("SURFACE 9");
+	a.addBoucle(boul);
+	EXPECT_EQ(a.getLstPossible().size(), 8);
+
+	// tir en 11 12
+	a.getMove();
+	boul = InfoBoucle(13, 10, 6, 5, 0, 1, 1, 1);
+	boul.addOrder("SURFACE 9");
+	a.addBoucle(boul);
+
+	EXPECT_EQ(a.getLstPossible().size(), 3);
+	a.getMove();
+	boul = InfoBoucle(13, 10, 6, 3, 0, 1, 1, 1);
+	boul.addOrder("SURFACE 9");
+	a.addBoucle(boul);
+
+	EXPECT_EQ(a.getLstPossible().size(), 1);
+
+}
+
+TEST(TestCaseCG, Recursion) {
+	Carte ca(15, 15, 0);
+
+	ca.addLine(0, ".xxxxxxxxxxxx..");
+	ca.addLine(1, "xxxxxxxxxxxxx..");
+	ca.addLine(2, "...............");
+	ca.addLine(3, "xxxxx....xxxx..");
+	ca.addLine(4, "xxxxx...xxxxx..");
+	ca.addLine(5, "xxx.....xxxx...");
+	ca.addLine(6, "........xxx....");
+	ca.addLine(7, ".....xx.xx.xx..");
+	ca.addLine(8, ".....xx.xx.xx..");
+	ca.addLine(9, "...............");
+	ca.addLine(10, ".......xx......");
+	ca.addLine(11, ".......xx......");
+	ca.addLine(12, "............xx.");
+	ca.addLine(13, "............xx.");
+	ca.addLine(14, "...............");
+
+	ca.position(Point(0, 0));
+	EXPECT_EQ(ca.calcDeplacement(0,Point(1,0),"E"), -100.0);
+
+	ca.addLine(0, "..xxxxxxxxxxx..");
+	double a = -100 / 3;
+	a += -100 / 3;
+	a+= -100 / 3;
+	EXPECT_EQ(ca.calcDeplacement(0, Point(1, 0), "E"), a);
+	ca.addLine(0, "...xxxxxxxxxx..");
+	EXPECT_EQ(ca.calcDeplacement(0, Point(1, 0), "E"), -55.555555);
+
+	ca.position(Point(0, 0));
+	ca.position(Point(0, 0));
+	ca.position(Point(0, 0));
+
+}

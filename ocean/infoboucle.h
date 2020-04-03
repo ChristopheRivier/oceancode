@@ -33,6 +33,7 @@ class InfoBoucle {
 	int surface;
 	Point tir;
 public:
+	int getOppLife() { return opplife; }
 	InfoBoucle(int x, int y, int l, int o, int t, int s, int q, int m):pos(x,y),mylife(l),opplife(o),torpe(t), sonar(s), silence(q),
 		mine(m), surface(-1), tir(-1,-1){}
 	void addSonar(std::string s) {
