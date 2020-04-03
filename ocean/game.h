@@ -1,4 +1,4 @@
-
+ï»¿
 #ifndef GAME_H
 #define GAME_H
 #include <vector>
@@ -18,7 +18,7 @@ class Game {
 	std::vector<Point> lstPossible;
 	Point init;
 	bool debug;
-	Actions actPrec; //action précédente
+	Actions actPrec; //action prÃ©cÃ©dente
 public:
 
 	Game() :init(-1,-1),debug(false){}
@@ -27,7 +27,7 @@ public:
 
 	void addCarte(Carte& car) { c = car; }
 	void addBoucle(InfoBoucle& b) {
-		//test si action a porté
+		//test si action a portÃ©
 		//TODO faire un TU
 		if (actPrec.getTir().x != -1 ){
 			std::vector<Point> tmp ;
@@ -137,19 +137,41 @@ public:
 			}
 		}
 
-		if (a.N() && c.deplacementPossible(a.getN())) {
+		double nord = -100;
+		if (a.N())
+			nord = c.calcDeplacement(0, a.getN(), "N");
+		double sud = -100;
+		if (a.S())
+			sud = c.calcDeplacement(0, a.getS(), "S");
+		double est = -100;
+		if (a.E())
+			est = c.calcDeplacement(0, a.getE(), "E");
+		double ouest = -100;
+		if (a.W())
+			ouest = c.calcDeplacement(0, a.getW(), "W");
+
+		if (nord < -60 &&
+			sud < -60 &&
+			est < -60 &&
+			ouest < -60)
+			return "";
+
+		if (nord >= sud &&
+			nord >= est &&
+			nord >= ouest)
 			return "N";
-		}
-		else if (a.E()&&c.deplacementPossible(a.getE())) {
-			return "E";
-		}
-		else if (a.S()&&c.deplacementPossible(a.getS())) {
+		if (sud >= nord &&
+			sud >= est &&
+			sud >= ouest)
 			return "S";
-		}
-		else if (a.W()&&c.deplacementPossible(a.getW())) {
+		if (est >= nord &&
+			est >= sud &&
+			est >= ouest)
+			return "E";
+		if (ouest >= est &&
+			ouest >= sud &&
+			ouest >= nord)
 			return "W";
-		}
-		return "";
 	}
 	std::string getPrivilegeDirection(Point a,Point b) {
 		int x = a.x - b.x;
