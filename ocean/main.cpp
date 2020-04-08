@@ -63,6 +63,8 @@ int main()
 			std::cerr << boul.print() << endl;
 
 			std::cerr << game.getLstPossible().size() << " possible" << endl;
+//			game.printLstPossible("call");
+
 		}
 		
 		// Write an action using cout. DON'T FORGET THE "<< endl"

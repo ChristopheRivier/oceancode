@@ -21,8 +21,9 @@ class Carte {
 	int myId;
 	Tuile cart[15][15];
 	Point init;
+	int pos;
 public:
-	Carte() :width(15), height(15), myId(0) {}
+	Carte() :width(15), height(15), myId(0),pos(0) {}
 	Carte(int w, int h, int i):width(w),height(h),myId(i){}
 	void addTuile(int i, int j, char in) {
 		cart[i][j].setChar(in);
@@ -52,6 +53,7 @@ public:
 		return cart[p.x][p.y].isFree();
 	}
 	void position(Point p) {
+		pos++;
 		cart[p.x][p.y].passer();
 	}
 	void printCarte() {
@@ -74,10 +76,10 @@ public:
 				cart[i][j].clearPass();
 			}
 		}
-
+		pos = 0;
 	}
 	double calcDeplacement( int recurence, Point initial, std::string direction) {
-		if (recurence == 3)
+		if (recurence == 2)
 			return 100;
 		recurence++;
 		if (!deplacementPossible(initial))
@@ -106,4 +108,5 @@ public:
 		}
 		return ret;
 	}
+	int getTailleChemin() { return pos; }
 };

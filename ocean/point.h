@@ -30,7 +30,19 @@ public:
 		ret.goW();
 		return ret;
 	}
-
+	Point get(char w) {
+		switch (w) {
+		case 'N':
+			return getN();
+		case 'S':
+			return getS();
+		case 'E':
+			return getE();
+		case 'W':
+			return getW();
+		}
+		return *this;
+	}
 	bool go(char w) {
 		switch (w) {
 		case 'N':
@@ -86,6 +98,22 @@ public:
 		{
 			return false;
 		}
+	}
+	bool is(char w) {
+		switch (w) {
+		case 'N':
+			return N();
+		case 'S':
+			return S();
+		case 'E':
+			return E();
+		case 'W':
+			return W();
+		case '?':
+			//in that case we will do the test after
+			return true;
+		}
+		return false;
 	}
 	bool N() {
 		if (y > 0) {

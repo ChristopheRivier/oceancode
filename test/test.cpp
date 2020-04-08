@@ -337,7 +337,7 @@ TEST(TestCaseOposant, getMove ) {
 	a.calculDesPossible();
 	EXPECT_EQ(a.getLstPossible().size(), 1);
 	std::string s = a.getMove();
-	EXPECT_EQ(s, "MOVE S|TORPEDO 13 1");
+	EXPECT_EQ(s, "TORPEDO 13 1|MOVE E SILENCE");
 
 }
 
@@ -489,7 +489,7 @@ TEST(TestCaseTorpille, TorpilleOne) {
 	EXPECT_EQ(a.getLstPossible().size(), 1);
 
 	std::string s = a.getMove();
-	EXPECT_EQ(s, "MOVE W|TORPEDO 8 8");
+	EXPECT_EQ(s, "TORPEDO 8 8|MOVE W SILENCE");
 
 }
 
@@ -513,7 +513,7 @@ TEST(TestCaseTorpille, TorpilleTwo) {
 	ca.addLine(13, "...xxxxxxxxxxxx");
 	ca.addLine(14, "...xxxxxxxxxxxx");
 	Point p = ca.getInit();
-	InfoBoucle boul(12, 7, 6, 6, 0, 0, 0, 1);
+	InfoBoucle boul(12, 7, 6, 6, 0, 0, 0, 0);
 	boul.addOrder("MOVE E");
 
 	Game a;
@@ -527,7 +527,7 @@ TEST(TestCaseTorpille, TorpilleTwo) {
 	EXPECT_EQ(a.getLstPossible().size(), 147);
 
 	std::string s = a.getMove();
-	EXPECT_EQ(s, "SILENCE W 1");
+	EXPECT_EQ(s, "MINE W|SILENCE W 2");
 
 }
 TEST(TestCaseTorpille, TorpilleThree) {
@@ -605,17 +605,17 @@ TEST(TestCaseTorpille, TorpilleFor) {
 	Game a;
 	a.addCarte(ca);
 	a.addBoucle(boul);
-	InfoBoucle boul1(8, 7, 6, 6, 2, 4, 6, -1);
-	boul.addOrder("SURFACE 7");
+	InfoBoucle boul1(8, 7, 6, 6, 2, 4, 6, 2);
+	boul1.addOrder("SURFACE 7");
 	a.addBoucle(boul1);
-	boul1 = InfoBoucle(8, 6, 6, 6, 1, 4, 6, -1);
-	boul.addOrder("MOVE N");
+	boul1 = InfoBoucle(8, 6, 6, 6, 1, 4, 6, 2);
+	boul1.addOrder("MOVE N|TORPEDO 7 9");
 	a.addBoucle(boul1);
-	boul1 = InfoBoucle(8, 5, 6, 6, 0, 4, 6, -1);
-	boul.addOrder("MOVE N");
+	boul1 = InfoBoucle(5, 8, 6, 6, 0, 4, 6, 2);
+	boul1.addOrder("MOVE N");
 	a.addBoucle(boul1);
 	std::string s = a.getMove();
-	EXPECT_EQ(s, "MOVE N|TORPEDO 4 5");
+	EXPECT_EQ(s, "TORPEDO 3 8|MOVE W SILENCE");
 
 }
 TEST(TestCaseCG, OutsideMap) {
@@ -739,6 +739,51 @@ TEST(TestCaseCG, OutsideMap) {
 	a.addBoucle(boul);
 	s = a.getMove();
 	EXPECT_EQ(s, "MOVE W TORPEDO");
+
+}
+
+TEST(TestCaseCG, outofrangeDesPossibles) {
+
+	Carte ca(15, 15, 0);
+	std::string line;
+	ca.addLine(0, "........xxx....");
+	ca.addLine(1, "........xxxxxx.");
+	ca.addLine(2, ".xx.....xxxxxx.");
+	ca.addLine(3, ".xx.....xx.xxx.");
+	ca.addLine(4, "...............");
+	ca.addLine(5, "............xx.");
+	ca.addLine(6, "...........xxx.");
+	ca.addLine(7, "...........xxx.");
+	ca.addLine(8, "..............x");
+	ca.addLine(9, "........xx....x");
+	ca.addLine(10, "........xx.....");
+	ca.addLine(11, "...............");
+	ca.addLine(12, "xx.............");
+	ca.addLine(13, "xx......xx.....");
+	ca.addLine(14, "........xx.....");
+
+	InfoBoucle boul(7, 7, 6, 6, 3, 4, 6, -1);
+	boul.addOrder("NA");
+	Game a;
+	a.addCarte(ca);
+	a.addBoucle(boul);
+	boul = InfoBoucle(7, 6, 6, 6, 2, 4, 6, 3);
+	boul.addOrder("MOVE E");
+	a.addBoucle(boul);
+
+	EXPECT_EQ(a.getLstPossible().size(), 139);
+	boul = InfoBoucle(7, 5, 6, 6, 1, 4, 6, 3);
+	boul.addOrder("MOVE E");
+	a.addBoucle(boul);
+	std::vector<Point> l = a.getLstPossible();
+	for (std::vector<Point>::iterator i = l.begin(); i != l.end(); ++i) {
+		EXPECT_TRUE((*i).y < 15);
+		EXPECT_TRUE((*i).x < 15);
+		EXPECT_TRUE((*i).y >= 0);
+		EXPECT_TRUE((*i).x >= 0);
+
+		std::cerr << (*i).toString() << std::endl;
+	}
 
 }
 

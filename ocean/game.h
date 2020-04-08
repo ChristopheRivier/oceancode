@@ -14,6 +14,7 @@ class Game {
 	Carte c;
 	std::vector<InfoBoucle> tour;
 	std::vector<std::string> deplacementOpp;
+	std::vector<Point> lstMine;
 	ZoneOpp zone;
 	std::vector<Point> lstPossible;
 	Point init;
@@ -59,6 +60,10 @@ public:
 			c.position(b.getPos());
 		if (!b.getMove().empty()) {
 			zone.move(b.getMove());
+
+			if (lstPossible.size() == 0)
+				calculDesPossible();
+
 			calculDesPossibleInc(b.getMove());
 			deplacementOpp.push_back(b.getMove());
 		}
@@ -68,9 +73,24 @@ public:
 			//clean des possibles
 			cleanPossible(b.getSurface());
 		}
+		
 		if (b.getTir().x != -1) {
 			cleanPossibleNear(b.getTir());
 		}
+
+	}
+	void printLstPossible(std::string s) {
+		for (std::vector<Point>::iterator i = lstPossible.begin();
+			i != lstPossible.end();
+			++i) {
+			//				std::cerr << (*i).toString() << endl;
+			std::cerr << (*i).toString() << std::endl;
+
+			if ((*i).y > 15)
+				std::cerr << " before "<< s<<" ----------------------------------------------------- " << std::endl;
+
+		}
+
 	}
 	void cleanPossibleNear(Point a) {
 		std::vector<Point> tmp;
@@ -81,6 +101,15 @@ public:
 			int y = (*it).y - a.y;
 			if (abs(x) + abs(y) <= 4) {
 				tmp.push_back(*it);
+			}
+		}
+		if (tmp.size() == 0) {
+			int maxx = a.x + 4>14?14: a.x + 4;
+			int maxy = a.y + 4 > 14 ? 14 : a.y + 4;
+			for (int x = abs(a.x-4); x <= maxx; ++x) {
+				for (int y = abs(a.y-4); y <= maxy; ++y)
+					if( abs(x-a.x)+abs(y-a.y) <=4 && c.deplacementPossible(Point(x, y)))
+						tmp.push_back(Point(x, y));
 			}
 		}
 		lstPossible.clear();
@@ -100,6 +129,13 @@ public:
 				(*it).y <= 4 + zoney * 5 
 				) {
 				tmp.push_back(*it);
+			}
+		}
+		if (tmp.size() == 0) {
+			for (int x = 0 + zonex * 5; x <= 4 + zonex * 5; ++x) {
+				for (int y = 0 + zoney * 5; y <= 4 + zoney * 5; ++y)
+					if (c.deplacementPossible(Point(x, y)))
+						tmp.push_back(Point(x, y));
 			}
 		}
 		lstPossible.clear();
@@ -149,11 +185,11 @@ public:
 		double ouest = -100;
 		if (a.W())
 			ouest = c.calcDeplacement(0, a.getW(), "W");
-
-		if (nord < -60 &&
-			sud < -60 &&
-			est < -60 &&
-			ouest < -60)
+		int t = -90;
+		if (nord < t &&
+			sud < t &&
+			est < t &&
+			ouest < t)
 			return "";
 
 		if (nord >= sud &&
@@ -172,11 +208,12 @@ public:
 			ouest >= sud &&
 			ouest >= nord)
 			return "W";
+		return "";
 	}
 	std::string getPrivilegeDirection(Point a,Point b) {
 		int x = a.x - b.x;
 		int y = a.y - b.y;
-		if (abs(y) <= 1 && x <= 1)
+		if (abs(y) < 2 && abs(x) < 2)
 			return "";
 		if (abs(x) > abs(y)) {
 			if (x > 0)
@@ -246,7 +283,7 @@ public:
 		for (std::vector<Point>::iterator it = lstPossible.begin(); it != lstPossible.end() && ret.x == -1; ++it) {
 			int x = (*it).x - pos.x;
 			int y = (*it).y - pos.y;
-			if (abs(x)+abs(y) <=4) {
+			if (abs(x)+abs(y) <=4 && abs(x) + abs(y) >= 1 ) {
 				if (debug) {
 					std::cerr << " possible" << (*it).toString() << std::endl;
 				}
@@ -284,12 +321,14 @@ public:
 						tmp.push_back(a);
 				}
 			}else if ((*it).go(w[0]) && !c.isIsland(*it) && positionPossibleWithReversePath(*it,w,deplacementOpp) ) {
-				if (std::find(tmp.begin(), tmp.end(), *it) == tmp.end())
+				if (std::find(tmp.begin(), tmp.end(), *it) == tmp.end()) {
 					tmp.push_back(*it);
+				}
 			}
 		}
 		lstPossible.clear();
 		lstPossible = tmp;
+
 	}
 
 	void calculDesPossible() {
@@ -325,10 +364,12 @@ public:
 		if (i.getTorpe() != 0) {
 			s = "TORPEDO";
 		}
+		else if (i.getMine() != 0 && ( c.getTailleChemin()>25 || i.getSilence()==0 ))
+			s = "MINE";
 		else if (i.getTorpe() == 0 && i.getSilence()!=0 ) {
 			s = "SILENCE";
 		}
-		else {
+		else if (i.getSonar() != 0) {
 			s = "SONAR";
 		}
 		return s;
@@ -347,25 +388,68 @@ public:
 		else {
 			actPrec.setDirection(dep);
 			if ((*tour.rbegin()).getSilence() == 0) {
-				ret = "SILENCE " + dep + " 1";
+				Point e = (*tour.rbegin()).getPos().get(dep[0]);
+				std::string force = " 1";
+				if (e.is(dep[0]) && c.deplacementPossible(e.get(dep[0]))) {
+					force = " 2";
+					c.position(e);
+				}
+				ret = "SILENCE " + dep + force;
 			}
 			else {
 				power = true;
 				ret += dep;
 			}
 		}
-		if ((*tour.rbegin()).getTorpe() == 0 && getLstPossible().size()<10) {
-			if(getLstPossible().size()==0)
-				calculDesPossible();
+		if ((*tour.rbegin()).getTorpe() == 0 && lstPossible.size()<10) {
 			Point n = isNear((*tour.rbegin()).getPos());
 			if (n.x!=-1) {
 				actPrec.setTir(n);
-				ret += "|TORPEDO " + n.toString();
-			}else if(power)
+				ret = "TORPEDO " + n.toString()+"|"+ret;
+			}
+			if(power)
 				ret += " " + getPower();
 		}
 		else if(power)
 			ret += " " + getPower();
+		if ((*tour.rbegin()).getTorpe() < 2  && (*tour.rbegin()).getMine() == 0) {
+			lstMine.push_back((*tour.rbegin()).getPos().get(dep[0]));
+			if (dep.empty()) {
+				Point e = (*tour.rbegin()).getPos().get(dep[0]);
+				if (c.deplacementPossible(e.getN()))
+					dep = "N";
+				else if (c.deplacementPossible(e.getS()))
+					dep = "S";
+				else if (c.deplacementPossible(e.getE()))
+					dep = "E";
+				else if (c.deplacementPossible(e.getW()))
+					dep = "W";
+			}
+			ret = "MINE " + dep+"|"+ret;
+		}
+		//trigger the mine
+		if (lstPossible.size() < 10) {
+			bool end = true;
+			for (std::vector<Point>::iterator it = lstPossible.begin();
+				it != lstPossible.end() && end; ++it) {
+				std::vector<Point> tmp;
+				for (std::vector<Point>::iterator itmine = lstMine.begin();
+					itmine != lstMine.end() && end;
+					++itmine
+					) {
+		//			std::cerr << " mine " << (*itmine).toString() << std::endl;
+					int x = (*it).x - (*itmine).x;
+					int y = (*it).y - (*itmine).y;
+					if (abs(x) + abs(y) <= 1 && abs(x) + abs(y) >= 0) {
+						ret += "|TRIGGER " + (*itmine).toString();
+						end = false;
+					}
+					else
+						tmp.push_back((*itmine));
+				}
+				lstMine = tmp;
+			}
+		}
 		return ret;
 	}
 };

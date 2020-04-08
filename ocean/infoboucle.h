@@ -104,6 +104,8 @@ public:
 	void setPos(int i, int y) { pos = Point(i, y); }
 	int getTorpe() { return torpe; }
 	int getSilence() { return silence; }
+	int getSonar() { return sonar; }
+	int getMine() { return mine; }
 };
 
 #endif // !INFOBOUCLE
