@@ -24,7 +24,7 @@ class Carte {
 	int pos;
 public:
 	Carte() :width(15), height(15), myId(0),pos(0) {}
-	Carte(int w, int h, int i):width(w),height(h),myId(i){}
+	Carte(int w, int h, int i):width(w),height(h),myId(i),pos(0){}
 	void addTuile(int i, int j, char in) {
 		cart[i][j].setChar(in);
 	}
@@ -79,7 +79,7 @@ public:
 		pos = 0;
 	}
 	double calcDeplacement( int recurence, Point initial, std::string direction) {
-		if (recurence == 2)
+		if (recurence == 7)
 			return 100;
 		recurence++;
 		if (!deplacementPossible(initial))

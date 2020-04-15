@@ -37,7 +37,7 @@ public:
 				it != lstPossible.end();
 				++it) {
 				if ((*it) == actPrec.getTir() &&
-					b.getOppLife() + 2 == (*tour.rbegin()).getOppLife()
+					b.getOppLife() + 2 <= (*tour.rbegin()).getOppLife()
 					) {
 					tmp.push_back(*it);
 				}
@@ -58,26 +58,27 @@ public:
 			c.position(init);
 		else
 			c.position(b.getPos());
-		if (!b.getMove().empty()) {
-			zone.move(b.getMove());
+		// iterate on action list
+		for (std::vector<Action>::iterator it = b.getLstAction().begin(); it != b.getLstAction().end(); ++it) {
+			if ((*it).getType() == Action::Move|| (*it).getType() == Action::Silence) {
+				zone.move((*it).getDep());
 
-			if (lstPossible.size() == 0)
-				calculDesPossible();
-
-			calculDesPossibleInc(b.getMove());
-			deplacementOpp.push_back(b.getMove());
+				if (lstPossible.size() == 0)
+					calculDesPossible();
+				else
+					calculDesPossibleInc((*it).getDep());
+				deplacementOpp.push_back((*it).getDep());
+			}
+			else if ((*it).getType() == Action::Surface) {
+				deplacementOpp.clear();
+				zone.init();
+				//clean des possibles
+				cleanPossible((*it).getZone());
+			}
+			else if ((*it).getType() == Action::Torpedo) {
+				cleanPossibleNear((*it).getPos());
+			}
 		}
-		else if (b.getSurface() != -1) {
-			deplacementOpp.clear();
-			zone.init();
-			//clean des possibles
-			cleanPossible(b.getSurface());
-		}
-		
-		if (b.getTir().x != -1) {
-			cleanPossibleNear(b.getTir());
-		}
-
 	}
 	void printLstPossible(std::string s) {
 		for (std::vector<Point>::iterator i = lstPossible.begin();
@@ -185,11 +186,11 @@ public:
 		double ouest = -100;
 		if (a.W())
 			ouest = c.calcDeplacement(0, a.getW(), "W");
-		int t = -90;
-		if (nord < t &&
-			sud < t &&
-			est < t &&
-			ouest < t)
+		int t = -100;
+		if (nord <= t &&
+			sud <= t &&
+			est <= t &&
+			ouest <= t)
 			return "";
 
 		if (nord >= sud &&
@@ -228,53 +229,125 @@ public:
 				return "S";
 		}
 	}
-	bool positionPossibleWithReversePath(Point p, std::string from, std::vector<std::string> it) {
-		if (it.size() == 0)
+	bool positionPossibleWithReversePath(Point p, std::string from, std::vector<std::string> it, std::vector<Point> pass, int incSilence) {
+		if (it.size() == 0 && incSilence==0 && from.empty() )
 			return true;
-		std::string to = *(it.rbegin());
+		std::string to;
+		if(it.size() != 0 )
+			to = *(it.rbegin());
 		if (from.compare("N") == 0 && to.compare("S") == 0 ||
 			from.compare("S") == 0 && to.compare("N") == 0 ||
 			from.compare("W") == 0 && to.compare("E") == 0 ||
 			from.compare("E") == 0 && to.compare("W") == 0
 			)
 			return false;
-		if (from.compare("N") == 0 && p.goS() && !c.isIsland(p)) {
-			it.pop_back();
-			return positionPossibleWithReversePath(p, to, it);
-		}
-		if (from.compare("S") == 0 && p.goN() && !c.isIsland(p)) {
-			it.pop_back();
-			return positionPossibleWithReversePath(p, to, it);
-		}
-		if (from.compare("E") == 0 && p.goW() && !c.isIsland(p)) {
-			it.pop_back();
-			return positionPossibleWithReversePath(p, to, it);
-		}
-		if (from.compare("W") == 0 && p.goE() && !c.isIsland(p)) {
-			it.pop_back();
-			return positionPossibleWithReversePath(p, to, it);
-		}
-		if (from.compare("?") == 0) {
-			Point a = p;
-			it.pop_back();
-			bool ret = false;
-			if (to.compare("S")!=0 && a.goS() && !c.isIsland(a)) {
-				ret = ret || positionPossibleWithReversePath(a, to, it);
+		pass.push_back(p);
+		if (incSilence == 0)
+		{
+			if (from.compare("N") == 0 && p.goS() && !c.isIsland(p) && std::find(pass.begin(), pass.end(), p) == pass.end()) {
+				if (it.size() != 0)
+					it.pop_back();
+				return positionPossibleWithReversePath(p, to, it, pass, incSilence);
 			}
-			a = p;
-			if (to.compare("N")!=0 && a.goN() && !c.isIsland(a)) {
-				ret = ret || positionPossibleWithReversePath(a, to, it);
+			if (from.compare("S") == 0 && p.goN() && !c.isIsland(p) && std::find(pass.begin(), pass.end(), p) == pass.end()) {
+				if (it.size() != 0)
+					it.pop_back();
+				return positionPossibleWithReversePath(p, to, it, pass, incSilence);
 			}
-			a = p;
-			if (to.compare("W")!=0 && a.goW() && !c.isIsland(a)) {
-				ret = ret || positionPossibleWithReversePath(a, to, it);
+			if (from.compare("E") == 0 && p.goW() && !c.isIsland(p) && std::find(pass.begin(), pass.end(), p) == pass.end()) {
+				if (it.size() != 0)
+					it.pop_back();
+				return positionPossibleWithReversePath(p, to, it, pass, incSilence);
 			}
-			a = p;
-			if (to.compare("E")!=0 && a.goE() && !c.isIsland(a)) {
-				ret = ret || positionPossibleWithReversePath(a, to, it);
+			if (from.compare("W") == 0 && p.goE() && !c.isIsland(p) && std::find(pass.begin(), pass.end(), p) == pass.end()) {
+				if (it.size() != 0)
+					it.pop_back();
+				return positionPossibleWithReversePath(p, to, it, pass, incSilence);
 			}
-			return ret;
+			if (from.compare("?") == 0) {
+				Point a = p;
+				bool ret = false;
+				if (to.compare("S") != 0 && a.goS() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+					ret = ret || positionPossibleWithReversePath(a, "N", it, pass, 1);
+					if (a.goS() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+						ret = ret || positionPossibleWithReversePath(a, "N", it, pass, 2);
+						if (a.goS() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+							ret = ret || positionPossibleWithReversePath(a, "N", it, pass, 3);
+							if (a.goS() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+								ret = ret || positionPossibleWithReversePath(a, "N", it, pass, 4);
+							}
+						}
+					}
+				}
+				a = p;
+				if (to.compare("N") != 0 && a.goN() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+					ret = ret || positionPossibleWithReversePath(a, "S", it, pass, 1);
+					if (a.goN() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+						ret = ret || positionPossibleWithReversePath(a, "S", it, pass, 2);
+						if (a.goN() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+							ret = ret || positionPossibleWithReversePath(a, "S", it, pass, 3);
+							if (a.goN() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+								ret = ret || positionPossibleWithReversePath(a, "S", it, pass, 4);
+
+							}
+						}
+					}
+				}
+				a = p;
+				if (to.compare("W") != 0 && a.goW() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+					ret = ret || positionPossibleWithReversePath(a, "E", it, pass, 1);				
+					if (a.goW() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+						ret = ret || positionPossibleWithReversePath(a, "E", it, pass, 2);
+						if (a.goW() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+							ret = ret || positionPossibleWithReversePath(a, "E", it, pass, 3);
+							if (a.goW() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+								ret = ret || positionPossibleWithReversePath(a, "E", it, pass, 4);
+							}
+						}
+					}
+				}
+				a = p;
+				if (to.compare("E") != 0 && a.goE() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+					ret = ret || positionPossibleWithReversePath(a, "W", it, pass, 1);
+					if (a.goE() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+						ret = ret || positionPossibleWithReversePath(a, "W", it, pass, 2);
+						if (a.goE() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+							ret = ret || positionPossibleWithReversePath(a, "W", it, pass, 3);
+							if (a.goE() && !c.isIsland(a) && std::find(pass.begin(), pass.end(), a) == pass.end()) {
+								ret = ret || positionPossibleWithReversePath(a, "W", it, pass, 4);
+							}
+						}
+					}
+				}
+				if (it.size() != 0)
+					it.pop_back();
+				ret = ret | positionPossibleWithReversePath(p, to, it, pass,0);
+				return ret;
+			}
 		}
+		else
+		{
+			// on decremente avec les mêmes arguments
+			--incSilence;
+			Point tt = p.getInv(from[0]);
+
+			if (incSilence == 0) {
+				if (!c.isIsland(tt) && std::find(pass.begin(), pass.end(), tt) == pass.end()) {
+					if (it.size() != 0)
+						it.pop_back();
+					return positionPossibleWithReversePath(tt, to, it, pass, incSilence);
+				}
+				else
+					return false;
+			}
+			else {
+				if (!c.isIsland(tt) && std::find(pass.begin(), pass.end(), tt) == pass.end())
+					return positionPossibleWithReversePath(tt, from, it, pass, incSilence);
+				else
+					return false;
+			}
+		}
+		
 		return false;
 	}
 
@@ -298,29 +371,82 @@ public:
 		for (std::vector<Point>::iterator it = lstPossible.begin();
 			it != lstPossible.end();
 			++it) {
+			std::vector<Point> lstPass;
 			if (w[0] == '?') {
 				Point a = *it;
+				//cas force 0
+				if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+					tmp.push_back(a);
+
 				bool ret = false;
-				if ( a.goS() && !c.isIsland(a) && positionPossibleWithReversePath(a, "S", deplacementOpp)) {
+				if ( a.goS() && !c.isIsland(a) && positionPossibleWithReversePath(a, "S", deplacementOpp, lstPass,1)) {
 					if(std::find(tmp.begin(),tmp.end(),a)==tmp.end())
 						tmp.push_back(a);
+					if (a.goS() && !c.isIsland(a) && positionPossibleWithReversePath(a, "S", deplacementOpp, lstPass, 2)) {
+						if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+							tmp.push_back(a);
+						if (a.goS() && !c.isIsland(a) && positionPossibleWithReversePath(a, "S", deplacementOpp, lstPass, 3)) {
+							if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+								tmp.push_back(a);
+						}
+						if (a.goS() && !c.isIsland(a) && positionPossibleWithReversePath(a, "S", deplacementOpp, lstPass, 4)) {
+							if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+								tmp.push_back(a);
+						}
+					}
 				}
 				a = *it;
-				if (a.goN() && !c.isIsland(a) && positionPossibleWithReversePath(a, "N", deplacementOpp)) {
+				if (a.goN() && !c.isIsland(a) && positionPossibleWithReversePath(a, "N", deplacementOpp, lstPass,1)) {
 					if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
 						tmp.push_back(a);
+					if (a.goN() && !c.isIsland(a) && positionPossibleWithReversePath(a, "N", deplacementOpp, lstPass, 2)) {
+						if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+							tmp.push_back(a);
+						if (a.goN() && !c.isIsland(a) && positionPossibleWithReversePath(a, "N", deplacementOpp, lstPass, 3)) {
+							if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+								tmp.push_back(a);
+							if (a.goN() && !c.isIsland(a) && positionPossibleWithReversePath(a, "N", deplacementOpp, lstPass, 4)) {
+								if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+									tmp.push_back(a);
+							}
+						}
+					}
 				}
 				a = *it;
-				if (a.goW() && !c.isIsland(a) && positionPossibleWithReversePath(a, "W", deplacementOpp)) {
+				if (a.goW() && !c.isIsland(a) && positionPossibleWithReversePath(a, "W", deplacementOpp, lstPass,1)) {
 					if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
 						tmp.push_back(a);
+					if (a.goW() && !c.isIsland(a) && positionPossibleWithReversePath(a, "W", deplacementOpp, lstPass, 2)) {
+						if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+							tmp.push_back(a);
+						if (a.goW() && !c.isIsland(a) && positionPossibleWithReversePath(a, "W", deplacementOpp, lstPass, 3)) {
+							if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+								tmp.push_back(a);
+							if (a.goW() && !c.isIsland(a) && positionPossibleWithReversePath(a, "W", deplacementOpp, lstPass, 4)) {
+								if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+									tmp.push_back(a);
+							}
+						}
+					}
 				}
 				a = *it;	
-				if (a.goE() && !c.isIsland(a) && positionPossibleWithReversePath(a, "E", deplacementOpp)) {
+				if (a.goE() && !c.isIsland(a) && positionPossibleWithReversePath(a, "E", deplacementOpp, lstPass,1)) {
 					if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
 						tmp.push_back(a);
+					if (a.goE() && !c.isIsland(a) && positionPossibleWithReversePath(a, "E", deplacementOpp, lstPass, 2)) {
+						if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+							tmp.push_back(a);
+						if (a.goE() && !c.isIsland(a) && positionPossibleWithReversePath(a, "E", deplacementOpp, lstPass, 3)) {
+							if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+								tmp.push_back(a);
+							if (a.goE() && !c.isIsland(a) && positionPossibleWithReversePath(a, "E", deplacementOpp, lstPass, 4)) {
+								if (std::find(tmp.begin(), tmp.end(), a) == tmp.end())
+									tmp.push_back(a);
+							}
+						}
+					}
 				}
-			}else if ((*it).go(w[0]) && !c.isIsland(*it) && positionPossibleWithReversePath(*it,w,deplacementOpp) ) {
+			}else if ((*it).go(w[0]) && !c.isIsland(*it) && positionPossibleWithReversePath(*it,w,deplacementOpp, lstPass,0) ) {
 				if (std::find(tmp.begin(), tmp.end(), *it) == tmp.end()) {
 					tmp.push_back(*it);
 				}
@@ -344,7 +470,8 @@ public:
 				Point p = zone.getPosition();
 				p.x += i;
 				p.y += j;
-				if ((!c.isIsland(p)) && positionPossibleWithReversePath(p,dp,ldp)) {
+				std::vector<Point> lstPass;
+				if ((!c.isIsland(p)) && positionPossibleWithReversePath(p,dp,ldp,lstPass,0)) {
 					lstPossible.push_back(p);
 				}
 			}
@@ -364,7 +491,7 @@ public:
 		if (i.getTorpe() != 0) {
 			s = "TORPEDO";
 		}
-		else if (i.getMine() != 0 && ( c.getTailleChemin()>25 || i.getSilence()==0 ))
+		else if (i.getMine() != 0 && ( (c.getTailleChemin()>21 && c.getTailleChemin() <50) || i.getSilence()==0 ))
 			s = "MINE";
 		else if (i.getTorpe() == 0 && i.getSilence()!=0 ) {
 			s = "SILENCE";
@@ -452,6 +579,7 @@ public:
 		}
 		return ret;
 	}
+	int getsize() { return lstPossible.size(); }
 };
 
 #endif

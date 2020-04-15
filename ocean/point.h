@@ -30,6 +30,19 @@ public:
 		ret.goW();
 		return ret;
 	}
+	Point getInv(char w) {
+		switch (w) {
+		case 'N':
+			return getS();
+		case 'S':
+			return getN();
+		case 'E':
+			return getW();
+		case 'W':
+			return getE();
+		}
+		return *this;
+	}
 	Point get(char w) {
 		switch (w) {
 		case 'N':

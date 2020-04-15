@@ -8,9 +8,9 @@ bool debug = true;
 using namespace std;
 #include "point.h"
 #include "carte.h"
+#include "action.h"
 #include "infoboucle.h"
 #include "zoneOpp.h"
-#include "action.h"
 #include "game.h"
 
 /**
@@ -61,6 +61,8 @@ int main()
 		if (debug)
 		{
 			std::cerr << boul.print() << endl;
+			if (game.getLstPossible().size() == 0)
+				std::cerr << " ssssssssssssssssssssssssssssssssssssssssssssssssssssss " << endl;
 
 			std::cerr << game.getLstPossible().size() << " possible" << endl;
 //			game.printLstPossible("call");
