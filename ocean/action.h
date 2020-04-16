@@ -46,7 +46,7 @@ public:
 		Surface
 	};
 
-	Action(std::string t) :pos(Point(-1,-1)){
+	Action(std::string t) :pos(Point(-1, -1)),type(None) {
 		if (t.back() == ' ') {
 			t.pop_back();
 		}
@@ -57,7 +57,7 @@ public:
 		}
 		else if (t.find("SILENCE") != std::string::npos) {
 			type = Silence;
-			deplacement = "?";
+			deplacement = '?';
 		}
 		else if (t.find("SURFACE") != std::string::npos) {
 			type = Surface;
@@ -77,12 +77,12 @@ public:
 	typeAction getType() {
 		return type;
 	}
-	std::string getDep() { return deplacement; }
+	char getDep() { return deplacement; }
 	int getZone() { return zone; }
 	Point getPos() { return pos; }
 private:
 	typeAction type;
-	std::string deplacement;
+	char deplacement;
 	int zone;
 	Point pos;
 };

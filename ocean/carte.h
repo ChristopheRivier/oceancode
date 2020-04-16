@@ -58,13 +58,16 @@ public:
 	}
 	void printCarte() {
 		if (true) {
-			for (int i = 0; i < width; ++i)
-			{
 				for (int j = 0; j < height; ++j)
+
+			{
+				std::cerr << "	ca.addLine(" << j<<",";
+				for (int i = 0; i < width; ++i)
+
 				{
 					std::cerr << cart[i][j].getChar();
 				}
-				std::cerr<< std::endl;
+				std::cerr<< ");"<<std::endl;
 			}
 		}
 	}

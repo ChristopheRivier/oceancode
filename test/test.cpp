@@ -170,21 +170,21 @@ TEST(TestCaseOposant, entreeOpposant) {
 	Game a;
 	a.addCarte(c);
 	a.addBoucle(boul);
-	EXPECT_EQ(a.getLastDeplacement(), "");
+	EXPECT_EQ(a.getLastDeplacement(), '\0');
 	boul.addOrder("MOVE S");
 	a.addBoucle(boul);
 
-	EXPECT_EQ(a.getLastDeplacement(), "S");
+	EXPECT_EQ(a.getLastDeplacement(), 'S');
 
 	boul.addOrder("MOVE N");
 	a.addBoucle(boul);
 
-	EXPECT_EQ(a.getLastDeplacement(), "N");
+	EXPECT_EQ(a.getLastDeplacement(), 'N');
 
 	boul.addOrder("MOVE N|TORPEDO 3 5");
-	EXPECT_EQ(a.getLastDeplacement(), "N");
+	EXPECT_EQ(a.getLastDeplacement(), 'N');
 	boul.addOrder("TORPEDO 3 5|MOVE N");
-	EXPECT_EQ(a.getLastDeplacement(), "N");
+	EXPECT_EQ(a.getLastDeplacement(), 'N');
 
 }
 
@@ -1066,3 +1066,319 @@ TEST(TestCaseCG, erreurDansLesPossibles) {
 	EXPECT_EQ(a.getLstPossible().size(), 1);
 
 }
+
+
+TEST(TestCaseCG, TimeOut) {
+	Carte ca(15, 15, 0);
+
+	ca.addLine(0, "..xxx.xxxx.....");
+	ca.addLine(1, "..xxx.....xxx..");
+	ca.addLine(2, "...xx.....xxx..");
+	ca.addLine(3, "...xx.....xxx..");
+	ca.addLine(4, "..........xx...");
+	ca.addLine(5, "xxx...........x");
+	ca.addLine(6, "xxx...........x");
+	ca.addLine(7, "xxx............");
+	ca.addLine(8, "...............");
+	ca.addLine(9, "...............");
+	ca.addLine(10, "...............");
+	ca.addLine(11, ".....xx.......x");
+	ca.addLine(12, ".....xx.......x");
+	ca.addLine(13, "...............");
+	ca.addLine(14, "...............");
+	Point p = ca.getInit();
+	InfoBoucle boul(7, 7, 6, 6, 3, 4, 6, 3);
+	boul.addOrder("MOVE S");
+	Game a;
+	a.addCarte(ca);
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(8, 7, 6, 6, 2, 4, 6, 3);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(9, 7, 6, 6, 1, 4, 6, 3);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(9, 8, 6, 6, 0, 4, 6, 3);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(9, 9, 6, 6, 0, 4, 5, 3);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(9, 10, 6, 6, 0, 4, 4, 3);
+	boul.addOrder("MOVE E");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(10, 10, 6, 6, 0, 4, 3, 3);
+	boul.addOrder("MOVE E");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(11, 10, 6, 6, 0, 4, 2, 3);
+	boul.addOrder("MOVE E");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(11, 11, 6, 6, 0, 4, 1, 3);
+	boul.addOrder("MOVE E");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(11, 12, 6, 6, 0, 4, 0, 3);
+	boul.addOrder("MOVE E");
+	a.addBoucle(boul);
+	EXPECT_EQ(a.getMove(), "SILENCE S 2");
+
+	boul = InfoBoucle(11, 14, 6, 6, 0, 4, 6, 3);
+	boul.addOrder("MOVE E");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(10, 14, 6, 6, 0, 4, 5, 3);
+	boul.addOrder("MOVE E");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(9, 14, 6, 6, 0, 4, 4, 3);
+	boul.addOrder("MOVE E");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(8, 14, 6, 6, 0, 4, 3, 3);
+	boul.addOrder("MOVE E|SONAR 5");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(7, 14, 6, 6, 0, 4, 2, 3);
+	boul.addOrder("SILENCE");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(6, 14, 6, 6, 0, 4, 1, 3);
+	boul.addOrder("MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(5, 14, 6, 6, 0, 4, 0, 3);
+	boul.addOrder("MOVE N");
+	a.addBoucle(boul);
+	EXPECT_EQ(a.getMove(), "SILENCE W 2");
+
+	boul = InfoBoucle(3, 14, 6, 6, 0, 4, 6, 3);
+	boul.addOrder("MOVE W");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(2, 14, 6, 6, 0, 4, 5, 3);
+	boul.addOrder("MOVE W");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(1, 14, 6, 6, 0, 4, 4, 3);
+	boul.addOrder("MOVE W");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(0, 14, 6, 6, 0, 4, 4, 2);
+	boul.addOrder("MOVE W");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(0, 13, 6, 6, 0, 4, 4, 1);
+	boul.addOrder("MOVE W");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(0, 12, 6, 6, 0, 4, 4, 0);
+	boul.addOrder("MOVE W");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(0, 11, 6, 6, 0, 4, 3, 3);
+	boul.addOrder("MOVE W");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(0, 10, 6, 6, 0, 4, 3, 2);
+	boul.addOrder("MOVE W");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(0, 10, 6, 6, 0, 4, 3, 2);
+	boul.addOrder("MOVE W");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(1, 10, 6, 6, 0, 4, 3, 1);
+	boul.addOrder("SILENCE|SONAR 5");
+	a.addBoucle(boul);
+	a.getMove();
+	
+
+}
+
+
+TEST(TestCaseCG, TrouveZeroPossible) {
+	Carte ca(15, 15, 0);
+	ca.addLine(0, "..xx...........");
+	ca.addLine(1, "......xxx......");
+	ca.addLine(2, "...xx.xxx......");
+	ca.addLine(3, "...xx.xxxx.....");
+	ca.addLine(4, ".....xxxxxx....");
+	ca.addLine(5, ".....xxxxxxx...");
+	ca.addLine(6, "..xx....xxxx...");
+	ca.addLine(7, "..xx...........");
+	ca.addLine(8, "...............");
+	ca.addLine(9, "...............");
+	ca.addLine(10, "......xx.......");
+	ca.addLine(11, "......xx.......");
+	ca.addLine(12, ".....xxx.......");
+	ca.addLine(13, ".....xxx.......");
+	ca.addLine(14, "......xx.......");
+
+	Point p = ca.getInit();
+	InfoBoucle boul(7, 7, 6, 6, 3, 4, 6, 3);
+	boul.addOrder("NA");
+	Game a;
+	a.addCarte(ca);
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(7, 8, 6, 6, 2, 4, 6, 3);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(8, 8, 6, 6, 1, 4, 6, 3);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(9, 8, 6, 6, 0, 4, 6, 3);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(10, 8, 6, 6, 0, 4, 5, 3);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(10, 9, 6, 6, 0, 4, 4, 3);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(11, 9, 6, 6, 0, 4, 3, 3);
+	boul.addOrder("MOVE S");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(11, 10, 6, 6, 0, 4, 2, 3);
+	boul.addOrder("MOVE E");
+	a.addBoucle(boul);
+	a.getMove();
+	EXPECT_EQ(a.getLstPossible().size(), 47);
+
+	boul = InfoBoucle(11, 11, 6, 6, 0, 4, 1, 3);
+	boul.addOrder("MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(11, 12, 6, 6, 0, 4, 0, 3);
+	boul.addOrder("MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+
+
+	boul = InfoBoucle(11, 14, 6, 6, 0, 4, 6, 3);
+	boul.addOrder("SILENCE|MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(12, 14, 6, 6, 0, 4, 5, 3);
+	boul.addOrder("MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(13, 14, 6, 6, 0, 4, 4, 3);
+	boul.addOrder("MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(14, 14, 6, 6, 0, 4, 3, 3);
+	boul.addOrder("MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(14, 13, 6, 6, 0, 4, 2, 3);
+	boul.addOrder("MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+	EXPECT_EQ(a.getLstPossible().size(), 35);
+
+	boul = InfoBoucle(14, 12, 6, 6, 0, 4, 1, 3);
+	boul.addOrder("MOVE W");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(14, 11, 6, 6, 0, 4, 0, 3);
+	boul.addOrder("MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(14, 9, 6, 6, 0, 4, 6, 3);
+	boul.addOrder("SILENCE|MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+	EXPECT_EQ(a.getLstPossible().size(), 37);
+
+
+	boul = InfoBoucle(14, 8, 6, 6, 0, 4, 5, 3);
+	boul.addOrder("MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(14, 7, 6, 6, 0, 4, 4, 3);
+	boul.addOrder("MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(14, 6, 6, 6, 0, 4, 4, 2);
+	boul.addOrder("MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(13, 6, 6, 6, 0, 4, 4, 1);
+	boul.addOrder("MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+
+	boul = InfoBoucle(12, 6, 6, 6, 0, 4, 4, 0);
+	boul.addOrder("MOVE N");
+	a.addBoucle(boul);
+	a.getMove();
+	EXPECT_EQ(a.getLstPossible().size(), 1);
+
+
+	boul = InfoBoucle(12, 5, 6, 6, 0, 4, 3, 3);
+	boul.addOrder("MOVE E");
+	a.addBoucle(boul);
+	a.getMove();
+
+	EXPECT_EQ(a.getLstPossible().size(), 1);
+
+}
+
+
+

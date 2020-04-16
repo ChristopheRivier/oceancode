@@ -2,7 +2,9 @@
 #define INFOBOUCLE
 
 
+#include <iostream>
 #include <string>
+
 #include "point.h"
 #include "action.h"
 #include <sstream>
@@ -39,22 +41,25 @@ public:
 	}
 	std::vector<Action> &getLstAction() { return lstAction; }
 	std::string print() {
+		/*
 		std::string s;
 		s = pos.toString() + " " + std::to_string(mylife) + " " + std::to_string(opplife) + " " + std::to_string(torpe) + " " + std::to_string(sonar) + " " + std::to_string(silence) + " " + std::to_string(mine);
 		s += "\n";
 		s += sonarRes;
 		s += "\n";
 		s += order;
+		*/
 
-/*
 		std::string s;
 		s = "boul = InfoBoucle(";
-		s += std::to_string(pos.x) + "," + to_string(pos.y) + ", " + std::to_string(mylife) + ", " + std::to_string(opplife) + ", " + std::to_string(torpe) + ", " + std::to_string(sonar) + ", " + std::to_string(silence) + ", " + std::to_string(mine);
+		s += std::to_string(pos.x) + "," + std::to_string(pos.y) + ", " + std::to_string(mylife) + ", " + std::to_string(opplife) + ", " + std::to_string(torpe) + ", " + std::to_string(sonar) + ", " + std::to_string(silence) + ", " + std::to_string(mine);
 		s += ");\n";
 		s += "boul.addOrder(\"";
-		s += order;
-		s += "\");";
-		*/
+		s += order;	
+		s += "\");\n";
+		s += "a.addBoucle(boul);\n";
+		s += "a.getMove();";
+		
 
 		return s;
 	}

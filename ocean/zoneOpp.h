@@ -19,8 +19,8 @@ public:
 	int getHauteur() { return ty; }
 	int getLargeur() { return tx; }
 	Point getPosition() { return Point(px, py); }
-	void move(std::string m) {
-		if (m.compare("N")==0) {
+	void move(char m) {
+		if (m == 'N') {
 			if (py == 0) {
 				ty++;
 			}
@@ -28,13 +28,13 @@ public:
 				py--;
 			}
 		}
-		else if (m.compare("S")==0) {
+		else if (m=='S') {
 			py++;
 			if (py == ty) {
 				ty++;
 			}
 		}
-		else if (m.compare("W")==0) {
+		else if (m=='W') {
 			if (px == 0) {
 				tx++;
 			}
@@ -42,7 +42,7 @@ public:
 				px--;
 			}
 		}
-		else if (m.compare("E")==0) {
+		else if (m=='E') {
 			px++;
 			if (px == tx) {
 				tx++;
